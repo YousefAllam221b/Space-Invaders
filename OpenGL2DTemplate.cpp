@@ -25,6 +25,14 @@ int translationSpaceshipX = 0;
 int translationSpaceshipY = 0;
 double spaceshipWidth = 150;
 double spaceshipHeight = 100;
+
+// Enemy values
+int enemyOriginX = 325;
+int enemyOriginY = 350;
+int translationEnemyX = 0;
+int translationEnemyY = 0;
+double enemyWidth = 150;
+double enemyHeight = 100;
 //-----------------
 
 void main(int argc, char** argr) {
@@ -40,7 +48,7 @@ void main(int argc, char** argr) {
     glutKeyboardUpFunc(KeyReleased);  // sets the KeyboardUp handler function; called when a key is released
     //glutMouseFunc(Mouse);       // sets the Mouse handler function; called when a mouse button is clicked
     //glutTimerFunc(0, Timer, 0); // sets the Timer handler function; which runs every `Threshold` milliseconds (1st argument)
-
+    Timer(0);
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
     glClearColor(1, 1, 1, 0);
     gluOrtho2D(0, 700, 0, 700);
@@ -111,7 +119,23 @@ void drawSpaceship()
     glVertex2f(150, 175);
     glEnd();*/
     glColor3f(1.0f, 1.0f, 0.0f);
-    drawPartialCircle(spaceshipOriginX + spaceshipHeight / 4, spaceshipOriginY + spaceshipHeight * 3 / 4, spaceshipHeight / 4, 270, 180);
+    drawPartialCircle(spaceshipOriginX + spaceshipWidth / 6, spaceshipOriginY + spaceshipHeight * 3 / 4, spaceshipWidth / 6, 270, 180);
+}
+
+void drawEnemy()
+{
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    // Body
+    glColor3f(0.0f, 0.0f, 1.0f);
+    drawRect(enemyOriginX, enemyOriginY, enemyWidth / 3, enemyHeight * 3 / 4);
+
+    // Left Triangle
+    glColor3f(0.0f, 1.0f, 0.0f);
+    glBegin(GL_TRIANGLES);
+    glVertex2f(enemyOriginX, enemyOriginY);
+    glVertex2f(enemyOriginX - enemyWidth / 3, enemyOriginY + enemyHeight * 3 / 4);
+    glVertex2f(enemyOriginX, enemyOriginY + enemyHeight * 3 / 4);
+    glEnd();
 }
 
 // Mouse handler function
@@ -135,16 +159,19 @@ void drawSpaceship()
 //    glutPostRedisplay();
 //}
 
+
 void Timer(int value) {
     // set the ball's Y coordinate to a random number between 10 and 780 (since the window's height is 800)
     //ballY = rand() % 780 + 10;
     //ballY = 500;
+    translationEnemyX -= 10;
+    printf("%d", translationEnemyX);
 
     // ask OpenGL to recall the display function to reflect the changes on the window
     glutPostRedisplay();
 
     // recall the Timer function after 20 seconds (20,000 milliseconds)
-    glutTimerFunc(20, Timer, 0);
+    glutTimerFunc(150, Timer, 0);
 }
 
 void Display() {
@@ -158,13 +185,18 @@ void Display() {
 
     // Bounding Box
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    drawRect(spaceshipOriginX - 55, spaceshipOriginY - 5, spaceshipWidth + 10, spaceshipHeight + 10);
+    drawRect(spaceshipOriginX - spaceshipWidth / 3 - 5, spaceshipOriginY - 5, spaceshipWidth + 10, spaceshipHeight + 10);
 
     // Spaceship
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     drawSpaceship(); 
     
     // Render Spaceship
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(translationEnemyX, translationEnemyY, 0);
+    drawEnemy();
     glPopMatrix();
     glFlush();
 }
